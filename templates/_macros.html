@@ -1,0 +1,49 @@
+{% macro logo(light=false, size='md') -%}
+<a href="{{ url_for('home') }}" class="group inline-flex items-center gap-2.5">
+  <span class="grid {{ 'h-9 w-9 rounded-xl' if size == 'sm' else 'h-11 w-11 rounded-2xl' }} place-items-center bg-clay text-cream shadow-soft transition group-hover:-rotate-6">
+    <i data-lucide="piggy-bank" class="{{ 'h-5 w-5' if size == 'sm' else 'h-6 w-6' }}"></i>
+  </span>
+  <span class="leading-none">
+    <span class="block font-display {{ 'text-xl' if size == 'sm' else 'text-2xl' }} font-semibold tracking-tight {{ 'text-cream' if light else 'text-ink' }}">{{ bank_name }}</span>
+    {% if size != 'sm' %}<span class="mt-1 block text-[11px] font-semibold uppercase tracking-[0.18em] {{ 'text-cream/60' if light else 'text-muted' }}">{{ tagline }}</span>{% endif %}
+  </span>
+</a>
+{%- endmacro %}
+
+{% macro modal(id, title, subtitle='', icon='sparkles', tone='forest', static=false) -%}
+<div id="{{ id }}" class="modal fixed inset-0 z-50 hidden items-end justify-center bg-ink/40 backdrop-blur-sm sm:items-center sm:p-4" role="dialog" aria-modal="true" aria-labelledby="{{ id }}-title"{% if static %} data-static="1"{% endif %}>
+  <div class="modal-panel max-h-[92vh] w-full max-w-md overflow-y-auto rounded-t-[28px] bg-white p-6 shadow-2xl sm:rounded-[28px] sm:p-7">
+    <div class="mb-6 flex items-start gap-3">
+      <span class="grid h-11 w-11 shrink-0 place-items-center rounded-2xl {{ tones[tone] }}"><i data-lucide="{{ icon }}" class="h-5 w-5"></i></span>
+      <div class="min-w-0 flex-1">
+        <h2 id="{{ id }}-title" class="font-display text-xl font-semibold">{{ title }}</h2>
+        {% if subtitle %}<p class="mt-0.5 text-sm text-muted">{{ subtitle }}</p>{% endif %}
+      </div>
+      <button type="button" data-close class="-mr-2 -mt-1 rounded-full p-2 text-muted transition hover:bg-sand hover:text-ink" aria-label="Close"><i data-lucide="x" class="h-5 w-5"></i></button>
+    </div>
+    {{ caller() }}
+  </div>
+</div>
+{%- endmacro %}
+
+{% macro secret_input(name, label, placeholder='••••', digits=true, autocomplete='off') -%}
+<label class="block">
+  <span class="label">{{ label }}</span>
+  <span class="relative block">
+    <input name="{{ name }}" type="password" {% if digits %}inputmode="numeric" maxlength="6" data-digits{% endif %} autocomplete="{{ autocomplete }}" placeholder="{{ placeholder }}" required class="field pr-12{% if digits %} text-lg tracking-[0.4em]{% endif %}">
+    <button type="button" class="toggle-secret absolute inset-y-0 right-2 grid w-10 place-items-center text-muted transition hover:text-ink" aria-label="Show or hide"><i data-lucide="eye" class="h-5 w-5"></i></button>
+  </span>
+</label>
+{%- endmacro %}
+
+{% macro error_box() -%}
+<p data-error role="alert" class="hidden rounded-2xl bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700"></p>
+{%- endmacro %}
+
+{% macro flash_alerts() -%}
+{% for cat, msg in get_flashed_messages(with_categories=true) %}
+<div role="alert" class="mt-6 flex items-start gap-3 rounded-2xl px-4 py-3 text-sm font-medium {{ {'error': 'bg-rose-50 text-rose-700', 'success': 'bg-forest-light text-forest-dark'}.get(cat, 'bg-sand/70 text-ink') }}">
+  <i data-lucide="{{ {'error': 'circle-alert', 'success': 'circle-check'}.get(cat, 'info') }}" class="mt-0.5 h-4 w-4 shrink-0"></i><span>{{ msg }}</span>
+</div>
+{% endfor %}
+{%- endmacro %}

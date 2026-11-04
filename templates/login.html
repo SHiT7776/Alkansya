@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% from "_macros.html" import logo, secret_input, flash_alerts with context %}
+{% block title %}Sign in · {{ bank_name }} · {{ tagline }}{% endblock %}
+{% block flash_toasts %}{% endblock %}
+
+{% block body %}
+<main class="grid min-h-screen lg:grid-cols-2">
+  <!-- Brand panel -->
+  <section class="card-surface relative hidden overflow-hidden px-12 py-10 text-cream lg:flex lg:flex-col lg:justify-between">
+    <div aria-hidden="true" class="coin absolute -right-20 -top-20 h-72 w-72 rounded-full opacity-90"></div>
+    <div aria-hidden="true" class="coin absolute bottom-24 right-14 h-16 w-16 rounded-full opacity-80"></div>
+
+    <div class="relative z-10">{{ logo(light=true) }}</div>
+
+    <div class="relative z-10 max-w-lg">
+      <span class="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-[#F6C9A8]">
+        <i data-lucide="sparkles" class="h-3.5 w-3.5"></i>No hammer required
+      </span>
+      <h1 class="mt-5 font-display text-5xl font-semibold leading-[1.05] xl:text-6xl">Finally, an alkansya you don't have to <span class="italic text-[#F2B48C]">break</span>.</h1>
+      <p class="mt-5 max-w-md text-lg leading-relaxed text-cream/75">Deposit, withdraw and check your ipon anytime. It's guarded by your PIN, not by a hammer.</p>
+      <ul class="mt-8 grid gap-3 text-sm text-cream/85">
+        {% for icon, text in [('lock-keyhole', 'PIN check on every transaction'),
+                              ('timer-reset', 'Auto sign-out after each transaction and when idle'),
+                              ('scroll-text', 'Every peso and every sign-in saved to the ledger')] %}
+        <li class="flex items-center gap-3"><span class="grid h-8 w-8 place-items-center rounded-xl bg-white/10"><i data-lucide="{{ icon }}" class="h-4 w-4"></i></span>{{ text }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <p class="relative z-10 text-xs text-cream/45">© {{ year }} {{ bank_name }} Savings · A banking simulator. No real pesos were harmed.</p>
+  </section>
+
+  <!-- Sign-in form -->
+  <section class="flex items-center justify-center px-5 py-12 sm:px-10">
+    <div class="fade-up w-full max-w-sm">
+      <div class="mb-10 lg:hidden">
+        {{ logo() }}
+        <p class="mt-5 font-display text-2xl font-semibold leading-snug">Finally, an alkansya you don't have to <span class="italic text-clay">break</span>.</p>
+      </div>
+
+      <h2 class="font-display text-3xl font-semibold tracking-tight">Welcome back</h2>
+      <p class="mt-1.5 text-muted">Sign in to peek inside your piggy bank.</p>
+
+      {{ flash_alerts() }}
+
+      <form method="post" class="mt-8 space-y-5" data-loading-form>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label class="block">
+          <span class="label">Username or account number</span>
+          <span class="relative block">
+            <i data-lucide="user-round" class="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted"></i>
+            <input name="username" value="{{ request.args.get('u', '') }}" autocomplete="username" autocapitalize="none" spellcheck="false" required {% if not request.args.get('u') %}autofocus{% endif %} class="field pl-12" placeholder="e.g. juan.dc">
+          </span>
+        </label>
+        {{ secret_input('secret', 'PIN (or admin password)', placeholder='Enter your PIN', digits=false, autocomplete='current-password') }}
+        <button type="submit" class="btn-primary w-full py-3.5 text-base"><i data-lucide="lock-keyhole" class="h-4 w-4"></i>Sign in securely</button>
+      </form>
+
+      <div class="mt-8 flex items-start gap-3 rounded-2xl border border-sand bg-white/70 p-4 text-xs leading-relaxed text-muted">
+        <i data-lucide="shield-check" class="mt-0.5 h-4 w-4 shrink-0 text-forest"></i>
+        <p>3 wrong PINs locks your account. You're signed out automatically after each transaction and after 5 minutes of inactivity.</p>
+      </div>
+    </div>
+  </section>
+</main>
+{% endblock %}

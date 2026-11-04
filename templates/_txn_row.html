@@ -1,0 +1,11 @@
+{% set dep = t.kind == 'deposit' %}
+<li class="fade-up flex items-center gap-4 py-3.5">
+  <span class="grid h-11 w-11 shrink-0 place-items-center rounded-2xl {{ 'bg-forest-light text-forest' if dep else 'bg-clay-light text-clay-dark' }}">
+    <i data-lucide="{{ 'arrow-down-left' if dep else 'arrow-up-right' }}" class="h-5 w-5"></i>
+  </span>
+  <div class="min-w-0 flex-1">
+    <p class="font-semibold">{{ t.note or ('Deposit' if dep else 'Withdrawal') }}</p>
+    <p class="truncate text-xs text-muted">{{ t.created_at|phtime }} · <span class="font-mono">{{ t.reference }}</span></p>
+  </div>
+  <p class="shrink-0 font-semibold tabular-nums {{ 'text-forest' if dep else 'text-ink' }}">{{ '+' if dep else '−' }}{{ t.amount_cents|peso }}</p>
+</li>

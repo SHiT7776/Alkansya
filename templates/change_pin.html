@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% from "_macros.html" import logo, secret_input, flash_alerts with context %}
+{% block title %}Set your PIN · {{ bank_name }}{% endblock %}
+{% block flash_toasts %}{% endblock %}
+
+{% block body %}
+<main class="flex min-h-screen items-center justify-center px-5 py-12">
+  <div class="fade-up w-full max-w-md">
+    <div class="mb-8 flex items-center justify-between">
+      {{ logo() }}
+      <a href="{{ url_for('logout') }}" class="text-sm font-semibold text-muted transition hover:text-ink">Sign out</a>
+    </div>
+
+    <div class="panel sm:p-8">
+      <span class="grid h-12 w-12 place-items-center rounded-2xl bg-clay-light text-clay-dark"><i data-lucide="key-round" class="h-6 w-6"></i></span>
+      <h1 class="mt-5 font-display text-2xl font-semibold">Hi {{ user.first_name }}, let's make it yours</h1>
+      <p class="mt-2 text-sm leading-relaxed text-muted">Your PIN was set by the bank admin. For your security, replace it with a new 4–6 digit PIN that only you know.</p>
+
+      {{ flash_alerts() }}
+
+      <form method="post" class="mt-6 space-y-4" data-loading-form>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        {{ secret_input('current_pin', 'Default PIN from the admin') }}
+        {{ secret_input('new_pin', 'New PIN') }}
+        {{ secret_input('confirm_pin', 'Confirm new PIN') }}
+        <ul class="space-y-1 text-xs text-muted">
+          <li class="flex items-center gap-2"><i data-lucide="check" class="h-3.5 w-3.5 text-forest"></i>4 to 6 digits</li>
+          <li class="flex items-center gap-2"><i data-lucide="check" class="h-3.5 w-3.5 text-forest"></i>Not too easy (no 1111 or 1234)</li>
+          <li class="flex items-center gap-2"><i data-lucide="check" class="h-3.5 w-3.5 text-forest"></i>Different from your default PIN</li>
+        </ul>
+        <button type="submit" class="btn-primary w-full py-3.5 text-base"><i data-lucide="shield-check" class="h-4 w-4"></i>Save PIN &amp; continue</button>
+      </form>
+    </div>
+  </div>
+</main>
+{% endblock %}

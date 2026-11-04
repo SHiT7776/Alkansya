@@ -1,0 +1,54 @@
+/* Alkansya: custom touches on top of Tailwind */
+body {
+  background-image:
+    radial-gradient(60rem 30rem at 110% -10%, rgba(200, 105, 63, .10), transparent 60%),
+    radial-gradient(50rem 30rem at -10% 110%, rgba(31, 77, 58, .08), transparent 60%);
+  background-attachment: fixed;
+}
+
+/* Green card surface with faint bamboo stripes, a nod to the bamboo alkansya */
+.card-surface {
+  background-color: #1F4D3A;
+  background-image:
+    radial-gradient(90% 120% at 100% 0%, rgba(242, 180, 140, .25), transparent 55%),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, .035) 0 2px, transparent 2px 22px),
+    linear-gradient(160deg, #2A634B 0%, #1F4D3A 45%, #143426 100%);
+}
+
+.coin {
+  background: radial-gradient(circle at 32% 28%, #F6C9A8 0%, #E08A5F 30%, #C8693F 62%, #9C4A27 100%);
+  box-shadow: inset 0 -10px 30px rgba(0, 0, 0, .18), inset 0 8px 20px rgba(255, 255, 255, .25);
+}
+
+/* Entrance animation */
+.fade-up { animation: fadeUp .55s cubic-bezier(.2, .7, .2, 1) both; }
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Modals */
+.modal { opacity: 0; transition: opacity .2s ease; }
+.modal.is-open { opacity: 1; }
+.modal .modal-panel { opacity: 0; transform: translateY(24px); transition: transform .3s cubic-bezier(.2, .8, .2, 1), opacity .2s ease; }
+.modal.is-open .modal-panel { opacity: 1; transform: none; }
+
+/* Toasts */
+.toast { animation: toastIn .3s cubic-bezier(.2, .8, .2, 1) both; }
+.toast-out { animation: toastOut .25s ease forwards; }
+@keyframes toastIn { from { opacity: 0; transform: translateY(-8px) scale(.98); } to { opacity: 1; transform: none; } }
+@keyframes toastOut { to { opacity: 0; transform: translateY(-8px); } }
+
+/* Torn-paper edge under the receipt header */
+.receipt-edge {
+  position: relative;
+  z-index: 1;
+  height: 14px;
+  margin-top: -14px;
+  background: radial-gradient(circle at 7px 0, transparent 7px, #fff 7.5px) 0 0 / 14px 14px repeat-x;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fade-up, .toast, .toast-out { animation: none !important; }
+  .modal, .modal .modal-panel { transition: none !important; }
+}

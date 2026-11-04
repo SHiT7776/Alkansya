@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <radialGradient id="coin" cx="35%" cy="30%" r="75%">
+      <stop offset="0" stop-color="#F6C9A8"/>
+      <stop offset=".45" stop-color="#E08A5F"/>
+      <stop offset="1" stop-color="#A4522D"/>
+    </radialGradient>
+    <clipPath id="above-slot"><rect width="64" height="41"/></clipPath>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="#1F4D3A"/>
+  <circle cx="32" cy="31" r="13" fill="url(#coin)" clip-path="url(#above-slot)"/>
+  <rect x="13" y="39" width="38" height="7" rx="3.5" fill="#FBF6EE"/>
+</svg>

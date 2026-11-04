@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+{% from "_macros.html" import modal, error_box with context %}
+{% block title %}Admin console · {{ bank_name }}{% endblock %}
+
+{% block body %}
+{% include "_nav.html" %}
+<main class="mx-auto max-w-6xl px-4 pb-20 pt-6 sm:px-6 sm:pt-10">
+  <div class="fade-up mb-6 flex flex-wrap items-end justify-between gap-4 sm:mb-8">
+    <div>
+      <p class="text-sm font-medium text-muted">Admin console</p>
+      <h1 class="font-display text-3xl font-semibold tracking-tight sm:text-4xl">Piggy Bank HQ</h1>
+      <p class="mt-1 text-sm text-muted">Open accounts, issue default PINs and watch every event.</p>
+    </div>
+    <button type="button" data-open="create-modal" class="btn-primary"><i data-lucide="user-plus" class="h-4 w-4"></i>New customer</button>
+  </div>
+
+  <!-- Stats -->
+  <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
+    {% for label, value, icon, tone in [
+      ('Customers', stats.customers, 'users', 'forest'),
+      ('Savings held', stats.holdings|peso, 'piggy-bank', 'clay'),
+      ('Transactions today', stats.today, 'activity', 'muted'),
+      ('Locked accounts', stats.locked, 'lock', 'rose' if stats.locked else 'muted')] %}
+    <div class="fade-up rounded-3xl border border-sand/80 bg-white p-4 shadow-soft sm:p-5">
+      <span class="grid h-10 w-10 place-items-center rounded-xl {{ tones[tone] }}"><i data-lucide="{{ icon }}" class="h-5 w-5"></i></span>
+      <p class="mt-4 text-xs font-medium text-muted sm:text-sm">{{ label }}</p>
+      <p class="mt-0.5 break-words font-display text-xl font-semibold tabular-nums sm:text-2xl">{{ value }}</p>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Customers -->
+  <section class="panel fade-up mt-6">
+    <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+      <div>
+        <h2 class="font-display text-xl font-semibold">Customers</h2>
+        <p class="text-sm text-muted">New customers must change their default PIN on first sign-in.</p>
+      </div>
+      <label class="relative w-full sm:w-64">
+        <i data-lucide="search" class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted"></i>
+        <input id="customer-search" type="search" placeholder="Search name, username, account" class="field py-2.5 pl-10 text-sm">
+      </label>
+    </div>
+
+    {% if customers %}
+    <div class="-mx-5 overflow-x-auto px-5 sm:-mx-6 sm:px-6">
+      <table class="w-full min-w-[760px] text-left">
+        <thead>
+          <tr class="border-b border-sand text-xs font-semibold uppercase tracking-wider text-muted">
+            <th class="py-3 pl-1 pr-4">Customer</th>
+            <th class="px-4 py-3">Account no.</th>
+            <th class="px-4 py-3 text-right">Balance</th>
+            <th class="px-4 py-3">Status</th>
+            <th class="px-4 py-3">Opened</th>
+            <th class="py-3 pl-4 pr-1 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-sand/70">
+          {% for c in customers %}
+          <tr class="customer-row" data-search="{{ (c.full_name ~ ' ' ~ c.username ~ ' ' ~ c.account_number)|lower }}">
+            <td class="py-3.5 pl-1 pr-4">
+              <div class="flex items-center gap-3">
+                <span class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-forest-light font-semibold text-forest">{{ c.full_name[:1]|upper }}</span>
+                <div class="min-w-0">
+                  <p class="font-semibold">{{ c.full_name }}</p>
+                  <p class="text-xs text-muted">@{{ c.username }}</p>
+                </div>
+              </div>
+            </td>
+            <td class="px-4 py-3.5 font-mono text-sm">{{ c.account_number|acct }}</td>
+            <td class="px-4 py-3.5 text-right font-semibold tabular-nums">{{ c.balance_cents|peso }}</td>
+            <td class="px-4 py-3.5">
+              {% if c.is_locked %}
+              <span class="inline-flex items-center gap-1.5 rounded-full bg-rose-100 px-2.5 py-1 text-xs font-semibold text-rose-700"><i data-lucide="lock" class="h-3 w-3"></i>Locked</span>
+              {% elif c.must_change_pin %}
+              <span class="inline-flex items-center gap-1.5 rounded-full bg-clay-light px-2.5 py-1 text-xs font-semibold text-clay-dark"><i data-lucide="key-round" class="h-3 w-3"></i>Awaiting new PIN</span>
+              {% else %}
+              <span class="inline-flex items-center gap-1.5 rounded-full bg-forest-light px-2.5 py-1 text-xs font-semibold text-forest"><span class="h-1.5 w-1.5 rounded-full bg-forest"></span>Active</span>
+              {% endif %}
+            </td>
+            <td class="px-4 py-3.5 text-sm text-muted">{{ c.created_at|phtime('%b %d, %Y') }}</td>
+            <td class="py-3.5 pl-4 pr-1">
+              <div class="flex justify-end gap-2">
+                {% if c.is_locked %}<button type="button" data-unlock="{{ c.id }}" class="btn-chip"><i data-lucide="lock-open" class="h-3.5 w-3.5"></i>Unlock</button>{% endif %}
+                <button type="button" data-reset="{{ c.id }}" data-name="{{ c.full_name }}" class="btn-chip"><i data-lucide="rotate-ccw" class="h-3.5 w-3.5"></i>Reset PIN</button>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <p id="no-match" class="hidden py-8 text-center text-sm text-muted">No customer matches your search.</p>
+    </div>
+    {% else %}
+    <div class="grid place-items-center py-12 text-center">
+      <span class="grid h-14 w-14 place-items-center rounded-2xl bg-clay-light text-clay"><i data-lucide="piggy-bank" class="h-7 w-7"></i></span>
+      <p class="mt-3 font-semibold">No customers yet</p>
+      <p class="text-sm text-muted">Create the first account and hand over a default PIN.</p>
+      <button type="button" data-open="create-modal" class="btn-primary mt-5"><i data-lucide="user-plus" class="h-4 w-4"></i>New customer</button>
+    </div>
+    {% endif %}
+  </section>
+
+  <!-- Audit trail -->
+  <section class="panel fade-up mt-6">
+    <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
+      <div>
+        <h2 class="font-display text-xl font-semibold">Audit trail</h2>
+        <p class="text-sm text-muted">Every sign-in, transaction and admin action is saved to the database.</p>
+      </div>
+      <span class="rounded-full bg-sand px-3 py-1 text-xs font-semibold text-muted">Latest {{ events|length }}</span>
+    </div>
+    <ul class="divide-y divide-sand/70">
+      {% for e in events %}
+      {% set icon, tone, label = events_meta.get(e.action, ('activity', 'muted', e.action)) %}
+      <li class="flex items-start gap-3 py-3">
+        <span class="grid h-9 w-9 shrink-0 place-items-center rounded-xl {{ tones[tone] }}"><i data-lucide="{{ icon }}" class="h-4 w-4"></i></span>
+        <div class="min-w-0 flex-1">
+          <p class="text-sm">
+            <span class="font-semibold">{{ label }}</span>
+            <span class="text-muted">· @{{ e.actor }}{% if e.user and e.user.username != e.actor %} → @{{ e.user.username }}{% endif %}</span>
+          </p>
+          {% if e.detail %}<p class="truncate text-xs text-muted">{{ e.detail }}</p>{% endif %}
+        </div>
+        <div class="shrink-0 text-right text-xs text-muted">
+          <p>{{ e.created_at|phtime('%b %d · %I:%M %p') }}</p>
+          {% if e.ip %}<p class="hidden font-mono sm:block">{{ e.ip }}</p>{% endif %}
+        </div>
+      </li>
+      {% else %}
+      <li class="py-6 text-sm text-muted">Nothing logged yet.</li>
+      {% endfor %}
+    </ul>
+  </section>
+</main>
+
+<!-- Create customer -->
+{% call modal('create-modal', 'New customer', 'Open an account and issue a default PIN', 'user-plus') %}
+<form id="create-form" class="space-y-4" novalidate>
+  <label class="block">
+    <span class="label">Full name</span>
+    <input name="full_name" class="field" placeholder="Juan Dela Cruz" maxlength="80" required>
+  </label>
+  <label class="block">
+    <span class="label">Username</span>
+    <input name="username" class="field" placeholder="juan.dc" maxlength="20" autocapitalize="none" spellcheck="false" required>
+    <span class="mt-1 block text-xs text-muted">3–20 characters: letters, numbers, dots or underscores.</span>
+  </label>
+  <div class="grid gap-4 sm:grid-cols-2">
+    <label class="block">
+      <span class="label">Default PIN</span>
+      <span class="relative block">
+        <input name="pin" value="{{ suggested_pin }}" inputmode="numeric" maxlength="6" data-digits autocomplete="off" class="field pr-12 font-mono tracking-[0.3em]" required>
+        <button type="button" data-generate-pin class="absolute inset-y-0 right-2 grid w-10 place-items-center text-muted transition hover:text-forest" title="Generate a random PIN" aria-label="Generate a random PIN"><i data-lucide="dices" class="h-5 w-5"></i></button>
+      </span>
+    </label>
+    <label class="block">
+      <span class="label">Opening deposit <span class="font-normal text-muted">(optional)</span></span>
+      <span class="relative block">
+        <span class="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted">₱</span>
+        <input name="opening" inputmode="decimal" autocomplete="off" class="field pl-9" placeholder="0.00">
+      </span>
+    </label>
+  </div>
+  {{ error_box() }}
+  <button type="submit" class="btn-primary w-full py-3.5"><i data-lucide="sparkles" class="h-4 w-4"></i>Create account</button>
+</form>
+{% endcall %}
+
+<!-- Credentials (shown once) -->
+{% call modal('cred-modal', 'Account ready!', 'Hand these to the customer', 'badge-check', 'forest', static=true) %}
+<div class="space-y-4">
+  <div class="card-surface rounded-3xl p-5 text-cream">
+    <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-cream/60">Customer</p>
+    <p data-c="name" class="font-display text-xl font-semibold"></p>
+    <div class="mt-4 grid grid-cols-2 gap-4 text-sm">
+      <div><p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-cream/60">Username</p><p data-c="username" class="mt-0.5 font-semibold"></p></div>
+      <div><p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-cream/60">Account no.</p><p data-c="account" class="mt-0.5 font-mono"></p></div>
+    </div>
+  </div>
+  <div class="flex items-center justify-between gap-3 rounded-2xl border-2 border-dashed border-clay/40 bg-clay-light/50 px-5 py-4">
+    <div>
+      <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-clay-dark">Default PIN</p>
+      <p data-c="pin" class="font-mono text-3xl font-semibold tracking-[0.3em]"></p>
+    </div>
+    <button type="button" data-copy-pin class="btn-chip"><i data-lucide="copy" class="h-3.5 w-3.5"></i>Copy</button>
+  </div>
+  <p class="flex items-start gap-2 text-xs text-muted"><i data-lucide="info" class="mt-0.5 h-4 w-4 shrink-0"></i>This PIN is shown only once. The customer must replace it the first time they sign in.</p>
+  <button type="button" data-done class="btn-primary w-full py-3.5">Done</button>
+</div>
+{% endcall %}
+{% endblock %}
+
+{% block scripts %}<script src="{{ url_for('static', filename='js/admin.js') }}"></script>{% endblock %}
