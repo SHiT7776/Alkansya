@@ -44,8 +44,8 @@ app = Flask(__name__)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)  # Render runs behind a proxy
 
 database_url = os.getenv("DATABASE_URL") or "sqlite:///alkansya.db"
-if database_url.startswith("postgres://"):  # SQLAlchemy needs the postgresql:// scheme
-    database_url = database_url.replace("postgres://", "postgresql://", 1)
+# Use the psycopg2 driver (psycopg2-binary). SQLAlchemy 2.1 would otherwise default to psycopg 3.
+database_url = re.sub(r"^postgres(ql)?://", "postgresql+psycopg2://", database_url)
 
 app.config.update(
     SECRET_KEY=os.getenv("SECRET_KEY") or "dev-only-secret-change-me",
