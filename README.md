@@ -42,4 +42,4 @@ Open http://127.0.0.1:5000 and sign in as `admin` / `admin123`. Locally the app 
 ## Deploy on Render
 1. Push this folder to a GitHub repository.
 2. In Render, choose **New → Blueprint** and pick the repository. Render reads `render.yaml` and creates the web service and a free PostgreSQL database.
-3. When Render asks for `ADMIN_PASSWORD`, enter the admin password you want to use.
+3. Click **Apply**. The admin account is `admin` / `admin123` (set in `render.yaml`).
